@@ -25,7 +25,7 @@ class CharacterPagination with _$CharacterPagination {
 final characterPages = FutureProvider.autoDispose
     .family<MarvelListCharactersReponse, CharacterPagination>(
   (ref, meta) async {
-    // Cancel the page request if the UI no-longer needs it before the request
+    // Cancel the page request if the UI no longer needs it before the request
     // is finished.
     // This typically happen if the user scrolls very fast
     final cancelToken = CancelToken();
@@ -40,7 +40,7 @@ final characterPages = FutureProvider.autoDispose
     );
 
     // Once a page gets downloaded, preserve its state to avoid re-downloading it again.
-    ref.maintainState = true;
+    ref.keepAlive();
     return charactersResponse;
   },
 );

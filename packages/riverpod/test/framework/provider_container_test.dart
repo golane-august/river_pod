@@ -7,6 +7,46 @@ import 'uni_directional_test.dart';
 
 void main() {
   group('ProviderContainer', () {
+    group('cacheTime', () {
+      test('defaults to zero', () {
+        final container = createContainer();
+
+        expect(container.cacheTime, Duration.zero);
+      });
+
+      test(
+          'if a parent is specified and no default is passed, use the parent cacheTime',
+          () {
+        final parent = createContainer(cacheTime: const Duration(seconds: 5));
+        final container = createContainer(
+          parent: parent,
+          cacheTime: const Duration(seconds: 2),
+        );
+
+        expect(container.cacheTime, const Duration(seconds: 2));
+
+        final container2 = createContainer(parent: parent);
+
+        expect(container2.cacheTime, const Duration(seconds: 5));
+      });
+    });
+
+    test(
+        'when using overrideWithProvider, handles overriding with a more specific provider type',
+        () {
+      final fooProvider = Provider<Foo>((ref) => Foo());
+
+      final container = createContainer(
+        overrides: [
+          fooProvider.overrideWithProvider(
+            Provider<Bar>((ref) => Bar()),
+          ),
+        ],
+      );
+
+      expect(container.read(fooProvider), isA<Bar>());
+    });
+
     test(
         'when the same provider is overridden multiple times at once, uses the latest override',
         () {
@@ -117,7 +157,8 @@ void main() {
       verifyOnly(listener, listener(0, 1));
     });
 
-    test('flushes listened providers even if they have no external listeners',
+    test(
+        'flushes listened-to providers even if they have no external listeners',
         () async {
       final dep = StateProvider((ref) => 0);
       final provider = Provider((ref) => ref.watch(dep.state).state);
@@ -463,3 +504,7 @@ void main() {
     );
   });
 }
+
+class Foo {}
+
+class Bar extends Foo {}

@@ -10,7 +10,7 @@ abstract class AutoDisposeStateNotifierProviderRef<
 }
 
 /// {@template riverpod.statenotifierprovider}
-/// Creates a [StateNotifier] and expose its current state.
+/// Creates a [StateNotifier] and exposes its current state.
 ///
 /// This provider is used in combination with `package:state_notifier`.
 ///
@@ -88,14 +88,21 @@ class AutoDisposeStateNotifierProvider<Notifier extends StateNotifier<State>,
     List<ProviderOrFamily>? dependencies,
     Family? from,
     Object? argument,
+    Duration? cacheTime,
   })  : notifier = _AutoDisposeNotifierProvider(
           create,
           name: name,
           dependencies: dependencies,
           from: from,
           argument: argument,
+          cacheTime: cacheTime,
         ),
-        super(name: name, from: from, argument: argument);
+        super(
+          name: name,
+          from: from,
+          argument: argument,
+          cacheTime: cacheTime,
+        );
 
   /// {@macro riverpod.family}
   static const family = AutoDisposeStateNotifierProviderFamilyBuilder();
@@ -143,10 +150,12 @@ class _AutoDisposeNotifierProvider<Notifier extends StateNotifier<State>, State>
     required this.dependencies,
     Family? from,
     Object? argument,
+    Duration? cacheTime,
   }) : super(
           name: name == null ? null : '$name.notifier',
           from: from,
           argument: argument,
+          cacheTime: cacheTime,
         );
 
   final Create<Notifier, AutoDisposeStateNotifierProviderRef<Notifier, State>>
@@ -187,7 +196,7 @@ class _AutoDisposeNotifierProviderElement<Notifier extends StateNotifier<State>,
 }
 
 /// {@template riverpod.statenotifierprovider.family}
-/// A class that allows building a [AutoDisposeStateNotifierProvider] from an external parameter.
+/// A class that allows building an [AutoDisposeStateNotifierProvider] from an external parameter.
 /// {@endtemplate}
 @sealed
 class AutoDisposeStateNotifierProviderFamily<
@@ -199,7 +208,12 @@ class AutoDisposeStateNotifierProviderFamily<
     this._create, {
     String? name,
     List<ProviderOrFamily>? dependencies,
-  }) : super(name: name, dependencies: dependencies);
+    Duration? cacheTime,
+  }) : super(
+          name: name,
+          dependencies: dependencies,
+          cacheTime: cacheTime,
+        );
 
   final FamilyCreate<Notifier,
       AutoDisposeStateNotifierProviderRef<Notifier, State>, Arg> _create;

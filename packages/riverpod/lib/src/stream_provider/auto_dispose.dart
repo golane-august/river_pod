@@ -1,7 +1,7 @@
 part of '../stream_provider.dart';
 
 /// {@macro riverpod.providerrefbase}
-/// - [ProviderRef.state], the value currently exposed by this providers.
+/// - [ProviderRef.state], the value currently exposed by this provider.
 abstract class AutoDisposeStreamProviderRef<State> implements AutoDisposeRef {
   /// Obtains the state currently exposed by this provider.
   ///
@@ -29,7 +29,13 @@ class AutoDisposeStreamProvider<State>
     this.dependencies,
     Family? from,
     Object? argument,
-  }) : super(name: name, from: from, argument: argument);
+    Duration? cacheTime,
+  }) : super(
+          name: name,
+          from: from,
+          argument: argument,
+          cacheTime: cacheTime,
+        );
 
   /// {@macro riverpod.family}
   static const family = AutoDisposeStreamProviderFamilyBuilder();
@@ -48,6 +54,7 @@ class AutoDisposeStreamProvider<State>
     this,
     from: from,
     argument: argument,
+    cacheTime: cacheTime,
   );
 
   /// {@template riverpod.streamprovider.future}
@@ -56,6 +63,7 @@ class AutoDisposeStreamProvider<State>
     this,
     from: from,
     argument: argument,
+    cacheTime: cacheTime,
   );
 
   /// {@template riverpod.streamprovider.future}
@@ -88,12 +96,12 @@ class AutoDisposeStreamProvider<State>
   }
 }
 
-/// The Element of a [AutoDisposeStreamProvider]
+/// The Element of an [AutoDisposeStreamProvider]
 class AutoDisposeStreamProviderElement<State>
     extends AutoDisposeProviderElementBase<AsyncValue<State>>
     with _StreamProviderElementMixin<State>
     implements AutoDisposeStreamProviderRef<State> {
-  /// The Element of a [AutoDisposeStreamProvider]
+  /// The Element of an [AutoDisposeStreamProvider]
   AutoDisposeStreamProviderElement(AutoDisposeStreamProvider<State> provider)
       : super(provider);
 
@@ -113,7 +121,12 @@ class AutoDisposeStreamProviderFamily<State, Arg>
     this._create, {
     String? name,
     List<ProviderOrFamily>? dependencies,
-  }) : super(name: name, dependencies: dependencies);
+    Duration? cacheTime,
+  }) : super(
+          name: name,
+          dependencies: dependencies,
+          cacheTime: cacheTime,
+        );
 
   final FamilyCreate<Stream<State>, AutoDisposeStreamProviderRef<State>, Arg>
       _create;

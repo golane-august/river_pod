@@ -29,6 +29,35 @@ void main() {
     });
 
     test(
+        'calling ref.listen on a provider with an outdated dependency flushes it, then add the listener',
+        () {
+      final container = createContainer();
+      var buildCount = 0;
+      final dep2 = StateNotifierProvider<StateController<int>, int>(
+        (ref) => StateController(0),
+      );
+      final dep = Provider<int>((ref) {
+        buildCount++;
+        return ref.watch(dep2);
+      });
+      final listener = Listener<int>();
+      final provider = Provider((ref) {
+        ref.listen<int>(dep, listener);
+      });
+
+      container.read(dep);
+      container.read(dep2.notifier).state++; // mark `dep` as outdated
+
+      expect(buildCount, 1);
+      verifyZeroInteractions(listener);
+
+      container.read(provider);
+
+      expect(buildCount, 2);
+      verifyZeroInteractions(listener);
+    });
+
+    test(
         'when using selectors, `previous` is the latest notification instead of latest event',
         () {
       final container = createContainer();
@@ -67,7 +96,10 @@ void main() {
       final listener = Listener<int>();
       final errors = <Object>[];
       final provider = Provider((ref) {
-        ref.listen(dep, listener);
+        runZonedGuarded(
+          () => ref.listen(dep, listener),
+          (err, stack) => errors.add(err),
+        );
       });
 
       container.read(provider);
@@ -75,19 +107,12 @@ void main() {
       verifyZeroInteractions(listener);
       expect(errors, isEmpty);
 
-      runZonedGuarded(
-        () => container.read(isErrored.state).state = true,
-        (err, stack) => errors.add(err),
-      );
+      container.read(isErrored.notifier).state = true;
 
       await container.pump();
 
       verifyZeroInteractions(listener);
-      expect(errors, [
-        isA<ProviderException>()
-            .having((e) => e.exception, 'exception', isUnimplementedError)
-            .having((e) => e.provider, 'provider', dep),
-      ]);
+      expect(errors, [isUnimplementedError]);
     });
 
     test(
@@ -102,7 +127,10 @@ void main() {
       final listener = Listener<int>();
       final errors = <Object>[];
       final provider = Provider((ref) {
-        ref.listen(dep.select((value) => value), listener);
+        runZonedGuarded(
+          () => ref.listen(dep.select((value) => value), listener),
+          (err, stack) => errors.add(err),
+        );
       });
 
       container.read(provider);
@@ -110,19 +138,12 @@ void main() {
       verifyZeroInteractions(listener);
       expect(errors, isEmpty);
 
-      runZonedGuarded(
-        () => container.read(isErrored.state).state = true,
-        (err, stack) => errors.add(err),
-      );
+      container.read(isErrored.state).state = true;
 
       await container.pump();
 
       verifyZeroInteractions(listener);
-      expect(errors, [
-        isA<ProviderException>()
-            .having((e) => e.exception, 'exception', isUnimplementedError)
-            .having((e) => e.provider, 'provider', dep),
-      ]);
+      expect(errors, [isUnimplementedError]);
     });
 
     test('when rebuild throws, calls onError', () async {
@@ -212,9 +233,7 @@ void main() {
 
         verifyZeroInteractions(listener);
         expect(errors, [
-          isA<ProviderException>()
-              .having((e) => e.exception, 'exception', isUnimplementedError)
-              .having((e) => e.provider, 'provider', dep),
+          isUnimplementedError,
         ]);
       });
 
@@ -239,9 +258,7 @@ void main() {
 
         verifyZeroInteractions(listener);
         expect(errors, [
-          isA<ProviderException>()
-              .having((e) => e.exception, 'exception', isUnimplementedError)
-              .having((e) => e.provider, 'provider', dep),
+          isUnimplementedError,
         ]);
       });
 
@@ -300,7 +317,7 @@ void main() {
         final container = createContainer();
         final errors = <Object>[];
 
-        void Function()? sub;
+        ProviderSubscription<int>? sub;
 
         final provider = Provider((ref) {
           sub = runZonedGuarded(
@@ -337,7 +354,7 @@ void main() {
         final container = createContainer();
         final errors = <Object>[];
 
-        void Function()? sub;
+        ProviderSubscription<StateController<int>>? sub;
 
         final provider = Provider((ref) {
           sub = runZonedGuarded(
@@ -383,7 +400,7 @@ void main() {
         final container = createContainer();
         final errors = <Object>[];
 
-        void Function()? sub;
+        ProviderSubscription<int>? sub;
 
         final provider = Provider((ref) {
           sub = runZonedGuarded(
@@ -437,7 +454,7 @@ void main() {
         final container = createContainer();
         final errors = <Object>[];
 
-        void Function()? sub;
+        ProviderSubscription<int>? sub;
 
         final provider = Provider((ref) {
           sub = runZonedGuarded(
@@ -488,24 +505,20 @@ void main() {
       final listener = Listener<int>();
       final errors = <Object>[];
 
-      container.listen(dep, listener);
+      runZonedGuarded(
+        () => container.listen(dep, listener),
+        (err, stack) => errors.add(err),
+      );
 
       verifyZeroInteractions(listener);
       expect(errors, isEmpty);
 
-      runZonedGuarded(
-        () => container.read(isErrored.state).state = true,
-        (err, stack) => errors.add(err),
-      );
+      container.read(isErrored.state).state = true;
 
       await container.pump();
 
       verifyZeroInteractions(listener);
-      expect(errors, [
-        isA<ProviderException>()
-            .having((e) => e.exception, 'exception', isUnimplementedError)
-            .having((e) => e.provider, 'provider', dep),
-      ]);
+      expect(errors, [isUnimplementedError]);
     });
 
     test(
@@ -520,24 +533,20 @@ void main() {
       final listener = Listener<int>();
       final errors = <Object>[];
 
-      container.listen(dep.select((value) => value), listener);
+      runZonedGuarded(
+        () => container.listen(dep.select((value) => value), listener),
+        (err, stack) => errors.add(err),
+      );
 
       verifyZeroInteractions(listener);
       expect(errors, isEmpty);
 
-      runZonedGuarded(
-        () => container.read(isErrored.state).state = true,
-        (err, stack) => errors.add(err),
-      );
+      container.read(isErrored.state).state = true;
 
       await container.pump();
 
       verifyZeroInteractions(listener);
-      expect(errors, [
-        isA<ProviderException>()
-            .having((e) => e.exception, 'exception', isUnimplementedError)
-            .having((e) => e.provider, 'provider', dep),
-      ]);
+      expect(errors, [isUnimplementedError]);
     });
 
     test('when rebuild throws, calls onError', () async {
@@ -695,10 +704,10 @@ void main() {
       final listener2 = Listener<int>();
 
       final p = Provider((ref) {
-        void Function()? a;
+        ProviderSubscription<StateController<int>>? a;
         ref.listen<StateController<int>>(provider.state, (prev, value) {
           listener(prev?.state, value.state);
-          a?.call();
+          a?.close();
           a = null;
         });
 
@@ -807,9 +816,7 @@ void main() {
 
         verifyZeroInteractions(listener);
         expect(errors, [
-          isA<ProviderException>()
-              .having((e) => e.exception, 'exception', isUnimplementedError)
-              .having((e) => e.provider, 'provider', dep),
+          isUnimplementedError,
         ]);
       });
 
@@ -831,9 +838,7 @@ void main() {
 
         verifyZeroInteractions(listener);
         expect(errors, [
-          isA<ProviderException>()
-              .having((e) => e.exception, 'exception', isUnimplementedError)
-              .having((e) => e.provider, 'provider', dep),
+          isUnimplementedError,
         ]);
       });
 

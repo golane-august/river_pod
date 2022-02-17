@@ -64,7 +64,7 @@ See the [FAQ](#FAQ) if you have questions about what this means for [provider].
 
 ## Migration
 
-With the release of the version 1.0.0, the syntax for interacting with providers changed.
+With the release of version 1.0.0, the syntax for interacting with providers changed.
 
 See [the migration guide](https://riverpod.dev/docs/migration/0.14.0_to_1.0.0/) for more informations
 
@@ -75,10 +75,10 @@ See [the migration guide](https://riverpod.dev/docs/migration/0.14.0_to_1.0.0/) 
 - [Motivation](#motivation)
 - [Contributing](#contributing)
 - [FAQ](#faq)
-  - [Why another project when [provider] already exists?](#why-another-project-when-provider-already-exists)
+  - [Why another project when provider already exists?](#why-another-project-when-provider-already-exists)
   - [Is it safe to use in production?](#is-it-safe-to-use-in-production)
-  - [Will this get merged with [provider] at some point?](#will-this-get-merged-with-provider-at-some-point)
-  - [Will [provider] be deprecated/stop being supported?](#will-provider-be-deprecatedstop-being-supported)
+  - [Will this get merged with provider at some point?](#will-this-get-merged-with-provider-at-some-point)
+  - [Will provider be deprecated/stop being supported?](#will-provider-be-deprecatedstop-being-supported)
 
 ## Motivation
 
@@ -96,7 +96,7 @@ as an attempt to fix the common problems that [provider] face.
 - Testable and composable
 - Improve the readability of [InheritedWidget]s when we have multiple of them
   (which would naturally lead to a deeply nested widget tree).
-- Make apps more scalable with a unidirectional data-flow.
+- Make apps more scalable with a unidirectional data flow.
 
 From there, [Riverpod] goes a few steps beyond:
 
@@ -151,13 +151,9 @@ very similar usages, but we cannot create a lightbulb by improving our candle.
 
 ### Is it safe to use in production?
 
-Yes, but with caution.
+Yes.
 
-[Riverpod] recently left its experimental status, but it isn't fully stable either.
-The API may change slightly when more features are added, and some use-cases
-may not be as simple as they could be.
-
-But overall, you should be able to use [Riverpod] without trouble.
+[Riverpod] is stable and actively maintained.
 
 ### Will this get merged with [provider] at some point?
 
@@ -175,11 +171,8 @@ compromise.
 
 Not in the short term, no.
 
-This project is still experimental and unpopular. While it is, in a way,
-a [provider] 2.0, its worth has yet to be proven.
-
-Until it is certain that [Riverpod] is a better way of doing things
-and that the community likes it, [provider] will still be maintained.
+However, a migration tool is planned to help assist migration from provider
+to [Riverpod].
 
 [provider]: https://github.com/rrousselGit/provider
 [riverpod]: https://github.com/rrousselGit/river_pod

@@ -1,7 +1,7 @@
 part of '../state_provider.dart';
 
 /// {@macro riverpod.providerrefbase}
-/// - [controller], the [StateController] currently exposed by this providers.
+/// - [controller], the [StateController] currently exposed by this provider.
 abstract class AutoDisposeStateProviderRef<State>
     implements AutoDisposeRef, StateProviderRef<State> {}
 
@@ -19,14 +19,21 @@ class AutoDisposeStateProvider<State> extends AutoDisposeProviderBase<State>
     List<ProviderOrFamily>? dependencies,
     Family? from,
     Object? argument,
+    Duration? cacheTime,
   })  : notifier = _AutoDisposeNotifierProvider(
           create,
           name: modifierName(name, 'notifier'),
           dependencies: dependencies,
           from: from,
           argument: argument,
+          cacheTime: cacheTime,
         ),
-        super(name: name, from: from, argument: argument);
+        super(
+          name: name,
+          from: from,
+          argument: argument,
+          cacheTime: cacheTime,
+        );
 
   /// {@macro riverpod.family}
   static const family = AutoDisposeStateProviderFamilyBuilder();
@@ -81,7 +88,13 @@ class _AutoDisposeNotifierProvider<State>
     required this.dependencies,
     required Family? from,
     required Object? argument,
-  }) : super(name: name, from: from, argument: argument);
+    required Duration? cacheTime,
+  }) : super(
+          name: name,
+          from: from,
+          argument: argument,
+          cacheTime: cacheTime,
+        );
 
   final Create<State, AutoDisposeStateProviderRef<State>> _create;
 
@@ -150,7 +163,12 @@ class AutoDisposeStateProviderFamily<State, Arg>
     this._create, {
     String? name,
     List<ProviderOrFamily>? dependencies,
-  }) : super(name: name, dependencies: dependencies);
+    Duration? cacheTime,
+  }) : super(
+          name: name,
+          dependencies: dependencies,
+          cacheTime: cacheTime,
+        );
 
   final FamilyCreate<State, AutoDisposeStateProviderRef<State>, Arg> _create;
 

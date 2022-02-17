@@ -6,7 +6,7 @@ part of '../framework.dart';
 ///
 /// See also:
 ///
-/// - [read] and [watch], two methods that allows a provider to consume other providers.
+/// - [read] and [watch], two methods that allow a provider to consume other providers.
 /// - [onDispose], a method that allows performing a task when the provider is destroyed.
 /// {@endtemplate}
 abstract class Ref {
@@ -16,17 +16,61 @@ abstract class Ref {
   /// Re-create the state of a provider and return the new state.
   State refresh<State>(ProviderBase<State> provider);
 
+  /// A life-cycle for whenever a new listener is added to the provider.
+  ///
+  /// See also:
+  /// - [onRemoveListener], for when a listener is removed
+  void onAddListener(void Function() cb);
+
+  /// A life-cycle for whenever a listener is removed from the provider.
+  ///
+  /// See also:
+  /// - [onAddListener], for when a listener is addded
+  void onRemoveListener(void Function() cb);
+
+  /// A life-cycle for when a provider is listened again after it was paused
+  /// (and [onCancel] was triggered).
+  ///
+  /// See also:
+  /// - [AutoDisposeRef.keepAlive], which can be combined with [onCancel] for
+  ///   advanced manipulation on when the provider should get disposed.
+  /// - [Provider.autoDispose], a modifier which tell a provider that it should
+  ///   destroy its state when no longer listened to.
+  /// - [onDispose], a life-cycle for when a provider is disposed.
+  /// - [onCancel], a life-cycle for when all listeners of a provider are removed.
+  void onResume(void Function() cb);
+
+  /// Add a listener to perform an operation when the last listener of the provider
+  /// is removed.
+  ///
+  /// This typically means that the provider will be paused (or disposed if
+  /// using [Provider.autoDispose]) unless a new listener is added.
+  ///
+  /// When the callback is invoked, there is no guarantee that the provider
+  /// _will_ get paused/dispose. It is possible that after the last listener
+  /// is removed, a new listener is immediately added.
+  ///
+  /// See also:
+  /// - [AutoDisposeRef.keepAlive], which can be combined with [onCancel] for
+  ///   advanced manipulation on when the provider should get disposed.
+  /// - [Provider.autoDispose], a modifier which tell a provider that it should
+  ///   destroy its state when no longer listened to.
+  /// - [onDispose], a life-cycle for when a provider is disposed.
+  /// - [onResume], a life-cycle for when the provider is listened to again.
+  void onCancel(void Function() cb);
+
   /// Adds a listener to perform an operation right before the provider is destroyed.
   ///
-  /// This typically happen when a provider marked with `.autoDispose` is no-longer
+  /// This typically happen when a provider marked with `.autoDispose` is no longer
   /// used, or when [ProviderContainer.dispose] is called.
   ///
   /// See also:
   ///
   /// - [Provider.autoDispose], a modifier which tell a provider that it should
-  ///   destroy its state when no-longer listened.
+  ///   destroy its state when no longer listened to.
   /// - [ProviderContainer.dispose], to destroy all providers associated with
   ///   a [ProviderContainer] at once.
+  /// - [onCancel], a life-cycle for when all listeners of a provider are removed.
   void onDispose(void Function() cb);
 
   /// Read the state associated with a provider, without listening to that provider.
@@ -67,7 +111,7 @@ abstract class Ref {
   /// safer to use.
   T read<T>(ProviderBase<T> provider);
 
-  /// Obtains the state of a provider and cause the state to be re-evaluated
+  /// Obtains the state of a provider and causes the state to be re-evaluated
   /// when that provider emits a new value.
   ///
   /// Using [watch] allows supporting the scenario where we want to re-create
@@ -129,11 +173,10 @@ abstract class Ref {
   /// - `fireImmediately` can be optionally passed to tell Riverpod to immediately
   ///    call the listener with the current value.
   ///    Defaults to false.
-  // TODO update ProviderContainer.listen to match the return value
-  RemoveListener listen<T>(
+  ProviderSubscription<T> listen<T>(
     AlwaysAliveProviderListenable<T> provider,
     void Function(T? previous, T next) listener, {
-    bool fireImmediately,
     void Function(Object error, StackTrace stackTrace)? onError,
+    bool fireImmediately,
   });
 }
