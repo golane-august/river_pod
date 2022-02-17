@@ -73,6 +73,8 @@ void main() {
     });
     final container = createContainer();
 
+    container.listen(provider, (_, __) {});
+
     await expectLater(container.read(provider.future), completion(0));
   });
 
